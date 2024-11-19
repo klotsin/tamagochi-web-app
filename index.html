@@ -24,6 +24,18 @@
             font-size: 18px;
             margin-bottom: 20px;
         }
+        .status p span {
+            font-weight: bold;
+        }
+        .status .low {
+            color: red;
+        }
+        .status .medium {
+            color: orange;
+        }
+        .status .high {
+            color: green;
+        }
         .buttons button {
             margin: 10px;
             padding: 10px 20px;
@@ -37,12 +49,17 @@
         .buttons button:disabled {
             background-color: #cccccc;
         }
-        button:active {
-            animation: blink 0.2s;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -50,9 +67,9 @@
     <div class="container">
         <h1>Тамагочи</h1>
         <div class="status">
-            <p><strong>Здоровье:</strong> <span id="health">100</span></p>
-            <p><strong>Счастье:</strong> <span id="happiness">100</span></p>
-            <p><strong>Энергия:</strong> <span id="energy">100</span></p>
+            <p><strong>Здоровье:</strong> <span id="health" class="high">100</span></p>
+            <p><strong>Счастье:</strong> <span id="happiness" class="high">100</span></p>
+            <p><strong>Энергия:</strong> <span id="energy" class="high">100</span></p>
         </div>
         <div class="buttons">
             <button id="feed">Кормить</button>
@@ -60,25 +77,46 @@
             <button id="sleep">Спать</button>
             <button id="walk">Гулять</button>
             <button id="heal">Лечить</button>
+            <button id="train">Тренировать</button>
         </div>
     </div>
-
+    <div class="notification" id="notification"></div>
     <script>
         Telegram.WebApp.ready();
 
         const health = document.getElementById('health');
         const happiness = document.getElementById('happiness');
         const energy = document.getElementById('energy');
+        const notification = document.getElementById('notification');
+
+        const updateStatus = (stat, value) => {
+            stat.textContent = value;
+            stat.className = value > 70 ? 'high' : value > 40 ? 'medium' : 'low';
+        };
+
+        const showNotification = (message) => {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => { notification.style.display = 'none'; }, 2000);
+        };
 
         const sendCommand = (command) => {
             Telegram.WebApp.sendData(JSON.stringify({ command }));
         };
 
-        document.getElementById('feed').addEventListener('click', () => sendCommand('feed'));
-        document.getElementById('play').addEventListener('click', () => sendCommand('play'));
-        document.getElementById('sleep').addEventListener('click', () => sendCommand('sleep'));
-        document.getElementById('walk').addEventListener('click', () => sendCommand('walk'));
-        document.getElementById('heal').addEventListener('click', () => sendCommand('heal'));
+        document.querySelectorAll('.buttons button').forEach(button => {
+            button.addEventListener('click', () => {
+                sendCommand(button.id);
+                showNotification(`Команда "${button.textContent}" отправлена!`);
+            });
+        });
+
+        Telegram.WebApp.onEvent('web_app_data', (data) => {
+            const petData = JSON.parse(data.data);
+            updateStatus(health, petData.health);
+            updateStatus(happiness, petData.happiness);
+            updateStatus(energy, petData.energy);
+        });
     </script>
 </body>
 </html>
