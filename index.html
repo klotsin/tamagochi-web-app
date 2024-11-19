@@ -101,9 +101,10 @@
         };
 
         const sendCommand = (command) => {
+            console.log(`Команда отправлена: ${command}`); // Проверяем отправку
             Telegram.WebApp.sendData(JSON.stringify({ command }));
         };
-
+        
         document.querySelectorAll('.buttons button').forEach(button => {
             button.addEventListener('click', () => {
                 sendCommand(button.id);
@@ -112,6 +113,7 @@
         });
 
         Telegram.WebApp.onEvent('web_app_data', (data) => {
+            console.log('Получены данные:', data); // Логируем полученные данные
             const petData = JSON.parse(data.data);
             updateStatus(health, petData.health);
             updateStatus(happiness, petData.happiness);
