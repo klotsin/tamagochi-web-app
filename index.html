@@ -86,6 +86,7 @@
             happiness.textContent = petData.happiness;
             energy.textContent = petData.energy;
         });
+        Telegram.WebApp.sendData(JSON.stringify({ command: 'feed' }));
     </script>
 </body>
 </html>
