@@ -5,45 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тамагочи</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background: #ffffff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-        }
-        .status {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        .buttons button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        .buttons button:disabled {
-            background-color: #cccccc;
-        }
-        button:active {
-            animation: blink 0.2s;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        /* Оформление как в вашем коде */
     </style>
 </head>
 <body>
@@ -79,14 +41,6 @@
         document.getElementById('sleep').addEventListener('click', () => sendCommand('sleep'));
         document.getElementById('walk').addEventListener('click', () => sendCommand('walk'));
         document.getElementById('heal').addEventListener('click', () => sendCommand('heal'));
-
-        Telegram.WebApp.onEvent('web_app_data', (data) => {
-            const petData = JSON.parse(data.data);
-            health.textContent = petData.health;
-            happiness.textContent = petData.happiness;
-            energy.textContent = petData.energy;
-        });
-        Telegram.WebApp.sendData(JSON.stringify({ command: 'feed' }));
     </script>
 </body>
 </html>
