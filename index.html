@@ -82,8 +82,6 @@
     </div>
     <div class="notification" id="notification"></div>
     <script>
-        Telegram.WebApp.ready();
-
         const health = document.getElementById('health');
         const happiness = document.getElementById('happiness');
         const energy = document.getElementById('energy');
@@ -100,24 +98,49 @@
             setTimeout(() => { notification.style.display = 'none'; }, 2000);
         };
 
-        const sendCommand = (command) => {
-            console.log(`Команда отправлена: ${command}`); // Проверяем отправку
-            Telegram.WebApp.sendData(JSON.stringify({ command }));
-        };
-        
+        let sendCommand;
+
+        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            console.log("Telegram WebApp инициализирован.");
+
+            sendCommand = (command) => {
+                Telegram.WebApp.sendData(JSON.stringify({ command }));
+            };
+
+            Telegram.WebApp.onEvent('web_app_data', (data) => {
+                console.log('Получены данные:', data);
+                const petData = JSON.parse(data.data);
+                updateStatus(health, petData.health);
+                updateStatus(happiness, petData.happiness);
+                updateStatus(energy, petData.energy);
+            });
+        } else {
+            console.warn("Запущено вне Telegram WebApp. Некоторые функции недоступны.");
+
+            sendCommand = (command) => {
+                console.log(`Команда "${command}" отправлена (имитация)`);
+            };
+
+            // Имитация обновления статуса для тестов
+            document.querySelectorAll('.buttons button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const currentHealth = Math.max(0, Math.min(100, parseInt(health.textContent) - 5));
+                    const currentHappiness = Math.max(0, Math.min(100, parseInt(happiness.textContent) + 5));
+                    const currentEnergy = Math.max(0, Math.min(100, parseInt(energy.textContent) - 10));
+
+                    updateStatus(health, currentHealth);
+                    updateStatus(happiness, currentHappiness);
+                    updateStatus(energy, currentEnergy);
+                });
+            });
+        }
+
         document.querySelectorAll('.buttons button').forEach(button => {
             button.addEventListener('click', () => {
                 sendCommand(button.id);
                 showNotification(`Команда "${button.textContent}" отправлена!`);
             });
-        });
-
-        Telegram.WebApp.onEvent('web_app_data', (data) => {
-            console.log('Получены данные:', data); // Логируем полученные данные
-            const petData = JSON.parse(data.data);
-            updateStatus(health, petData.health);
-            updateStatus(happiness, petData.happiness);
-            updateStatus(energy, petData.energy);
         });
     </script>
 </body>
