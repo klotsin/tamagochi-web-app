@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тамагочи</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .status {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .buttons button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .buttons button:disabled {
+            background-color: #cccccc;
+        }
+        button:active {
+            animation: blink 0.2s;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Тамагочи</h1>
+        <div class="status">
+            <p><strong>Здоровье:</strong> <span id="health">100</span></p>
+            <p><strong>Счастье:</strong> <span id="happiness">100</span></p>
+            <p><strong>Энергия:</strong> <span id="energy">100</span></p>
+        </div>
+        <div class="buttons">
+            <button id="feed">Кормить</button>
+            <button id="play">Играть</button>
+            <button id="sleep">Спать</button>
+            <button id="walk">Гулять</button>
+            <button id="heal">Лечить</button>
+        </div>
+    </div>
+
+    <script>
+        Telegram.WebApp.ready();
+
+        const health = document.getElementById('health');
+        const happiness = document.getElementById('happiness');
+        const energy = document.getElementById('energy');
+
+        const sendCommand = (command) => {
+            Telegram.WebApp.sendData(JSON.stringify({ command }));
+        };
+
+        document.getElementById('feed').addEventListener('click', () => sendCommand('feed'));
+        document.getElementById('play').addEventListener('click', () => sendCommand('play'));
+        document.getElementById('sleep').addEventListener('click', () => sendCommand('sleep'));
+        document.getElementById('walk').addEventListener('click', () => sendCommand('walk'));
+        document.getElementById('heal').addEventListener('click', () => sendCommand('heal'));
+
+        Telegram.WebApp.onEvent('web_app_data', (data) => {
+            const petData = JSON.parse(data.data);
+            health.textContent = petData.health;
+            happiness.textContent = petData.happiness;
+            energy.textContent = petData.energy;
+        });
+    </script>
+</body>
+</html>
