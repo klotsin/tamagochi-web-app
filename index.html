@@ -87,55 +87,47 @@
         const energy = document.getElementById('energy');
         const notification = document.getElementById('notification');
 
+        // Обновление статусов
         const updateStatus = (stat, value) => {
             stat.textContent = value;
             stat.className = value > 70 ? 'high' : value > 40 ? 'medium' : 'low';
         };
 
+        // Уведомления
         const showNotification = (message) => {
             notification.textContent = message;
             notification.style.display = 'block';
             setTimeout(() => { notification.style.display = 'none'; }, 2000);
         };
 
-        let sendCommand;
+        // Отправка команд в Telegram Web App
+        const sendCommand = (command) => {
+            if (Telegram.WebApp) {
+                Telegram.WebApp.sendData(JSON.stringify({ command }));
+                console.log(`Команда "${command}" отправлена в Telegram WebApp.`);
+            } else {
+                console.warn("Telegram WebApp не найден. Работа в тестовом режиме.");
+            }
+        };
 
+        // Обработка данных от Telegram Web App
         if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
             Telegram.WebApp.ready();
-            console.log("Telegram WebApp инициализирован.");
-
-            sendCommand = (command) => {
-                Telegram.WebApp.sendData(JSON.stringify({ command }));
-            };
+            console.log("Telegram WebApp готов к работе.");
 
             Telegram.WebApp.onEvent('web_app_data', (data) => {
-                console.log('Получены данные:', data);
+                console.log('Получены данные от Telegram:', data);
                 const petData = JSON.parse(data.data);
                 updateStatus(health, petData.health);
                 updateStatus(happiness, petData.happiness);
                 updateStatus(energy, petData.energy);
+                showNotification("Данные обновлены!");
             });
         } else {
-            console.warn("Запущено вне Telegram WebApp. Некоторые функции недоступны.");
-
-            sendCommand = (command) => {
-                console.log(`Команда "${command}" отправлена (имитация)`);
-            };
-
-            // Имитация обновления статуса для тестов
-            document.querySelectorAll('.buttons button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const currentHealth = Math.max(0, Math.min(100, parseInt(health.textContent) - 5));
-                    const currentHappiness = Math.max(0, Math.min(100, parseInt(happiness.textContent) + 5));
-                    const currentEnergy = Math.max(0, Math.min(100, parseInt(energy.textContent) - 10));
-
-                    updateStatus(health, currentHealth);
-                    updateStatus(happiness, currentHappiness);
-                    updateStatus(energy, currentEnergy);
-                });
-            });
+            console.warn("Запущено вне Telegram WebApp.");
         }
 
+        // Привязка кнопок
         document.querySelectorAll('.buttons button').forEach(button => {
             button.addEventListener('click', () => {
                 sendCommand(button.id);
